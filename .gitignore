@@ -17,6 +17,7 @@ transformation/profiles.yml
 
 # ML artifacts (modelos treinados nao vao pro Git - sao gerados por train.py)
 ml/artifacts/
+!ml/artifacts/model.pkl
 
 # MLflow
 mlruns/
