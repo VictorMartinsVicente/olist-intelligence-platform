@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: fct_delivery_performance
+    description: >
+      Tabela fato principal do projeto. Uma linha por pedido entregue e avaliado,
+      com atraso calculado, review, valor do pedido e forma de pagamento.
+      Esta é a tabela usada tanto pelo dashboard quanto pelo treino do modelo de ML.
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: is_delayed
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: review_score
+        tests:
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+
+  - name: fct_seller_performance
+    description: "Métricas agregadas de receita e volume por vendedor."
+    columns:
+      - name: seller_id
+        tests: [unique, not_null]
+
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  - name: dim_sellers
+    columns:
+      - name: seller_id
+        tests: [unique, not_null]

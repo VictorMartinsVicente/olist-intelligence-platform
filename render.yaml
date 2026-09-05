@@ -1,0 +1,41 @@
+# Deploy alternativo via Render (render.com) — cobre tanto a API quanto o dashboard.
+# Para usar: conecte o repositório no Render e ele detecta este arquivo automaticamente
+# ("Blueprint" -> New + -> Blueprint -> selecione o repo).
+#
+# Alternativa ao Railway (railway.json). Use o que preferir — não precisa dos dois.
+
+services:
+  - type: web
+    name: olist-delay-prediction-api
+    runtime: docker
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: MODEL_PATH
+        value: /app/ml/artifacts/model.pkl
+
+  - type: web
+    name: olist-dashboard
+    runtime: docker
+    dockerfilePath: ./dashboard/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: API_URL
+        value: https://olist-delay-prediction-api.onrender.com
+      - key: POSTGRES_HOST
+        sync: false   # preencha manualmente no painel do Render após criar o banco
+      - key: POSTGRES_DB
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+
+databases:
+  - name: olist-postgres
+    plan: free
+    databaseName: olist
+    user: olist_user

@@ -1,0 +1,23 @@
+artifact_path: /home/claude/olist-intelligence-platform/mlruns/1/models/m-d60f5c3501ff4bdeb150508d9cc4e67b/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.12.3
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.16.0
+model_id: m-d60f5c3501ff4bdeb150508d9cc4e67b
+model_size_bytes: 6672125
+model_uuid: m-d60f5c3501ff4bdeb150508d9cc4e67b
+prompts: null
+run_id: f0a7eea5cfef4417b8e6656ec0ac0241
+utc_time_created: '2026-09-05 13:22:09.221161'

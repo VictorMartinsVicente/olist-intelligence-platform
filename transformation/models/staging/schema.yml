@@ -1,0 +1,85 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: olist_customers_dataset
+      - name: olist_sellers_dataset
+      - name: olist_products_dataset
+      - name: olist_orders_dataset
+      - name: olist_order_items_dataset
+      - name: olist_order_payments_dataset
+      - name: olist_order_reviews_dataset
+
+models:
+  - name: stg_customers
+    description: "Um registro por cliente, com estado e cidade normalizados."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: customer_state
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SP','RJ','MG','RS','PR','SC','BA','GO','PE','CE','PA','MA','ES','DF','AM','MT','MS','PB','RN','AL']
+
+  - name: stg_sellers
+    description: "Um registro por vendedor."
+    columns:
+      - name: seller_id
+        tests: [unique, not_null]
+
+  - name: stg_products
+    description: "Um registro por produto, com categoria e dimensões."
+    columns:
+      - name: product_id
+        tests: [unique, not_null]
+
+  - name: stg_orders
+    description: "Um registro por pedido, com todas as datas do ciclo de vida do pedido."
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['delivered','shipped','canceled','processing','invoiced','approved','unavailable','created']
+
+  - name: stg_order_items
+    description: "Um registro por item de pedido (um pedido pode ter vários)."
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: price
+        tests:
+          - not_null
+
+  - name: stg_order_payments
+    description: "Um registro por pedido com a forma de pagamento usada."
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+
+  - name: stg_order_reviews
+    description: "Um registro por review de pedido entregue."
+    columns:
+      - name: review_score
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
