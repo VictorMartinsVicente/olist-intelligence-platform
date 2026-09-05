@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Dados (grandes demais / ou sensiveis para versionar)
+data/raw/*.csv
+!data/raw/.gitkeep
+
+# dbt
+transformation/target/
+transformation/dbt_packages/
+transformation/logs/
+transformation/profiles.yml
+
+# ML artifacts (modelos treinados nao vao pro Git - sao gerados por train.py)
+ml/artifacts/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Ambiente
+.env
+.streamlit/secrets.toml
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Testes
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage

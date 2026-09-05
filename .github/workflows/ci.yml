@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: olist
+          POSTGRES_USER: olist_user
+          POSTGRES_PASSWORD: olist_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U olist_user"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r api/requirements.txt
+          pip install -r dashboard/requirements.txt
+          pip install pandas numpy scikit-learn joblib mlflow sqlalchemy psycopg2-binary pytest ruff dbt-postgres
+
+      - name: Lint (ruff)
+        run: ruff check . --exclude transformation
+
+      - name: Gerar dados sinteticos para teste
+        run: python data_generator/generate_synthetic_data.py --n-orders 3000
+
+      - name: Rodar testes unitarios
+        run: pytest tests/ api/tests/ -v
+
+      - name: Ingestao para Postgres
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: olist
+          POSTGRES_USER: olist_user
+          POSTGRES_PASSWORD: olist_pass
+        run: python ingestion/load_raw_to_postgres.py
+
+      - name: dbt run + test
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: olist
+          POSTGRES_USER: olist_user
+          POSTGRES_PASSWORD: olist_pass
+        run: |
+          dbt deps --project-dir transformation --profiles-dir transformation || true
+          dbt run --project-dir transformation --profiles-dir transformation
+          dbt test --project-dir transformation --profiles-dir transformation
+
+      - name: Build da imagem Docker da API (sem push)
+        run: |
+          python ml/train.py || true
+          docker build -f api/Dockerfile -t olist-api:ci .

@@ -1,0 +1,35 @@
+name: Deploy API (Railway)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "ml/**"
+      - "railway.json"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verificar se RAILWAY_TOKEN esta configurado
+        id: check_secret
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "RAILWAY_TOKEN nao configurado - pulando deploy."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Instalar Railway CLI
+        if: steps.check_secret.outputs.skip == 'false'
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        if: steps.check_secret.outputs.skip == 'false'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service olist-api
