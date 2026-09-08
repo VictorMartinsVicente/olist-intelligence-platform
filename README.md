@@ -144,46 +144,50 @@ ruff check .
 
 ## ☁️ Deploy em produção
 
-O repositório já vem com configuração pronta pra três serviços gratuitos. Escolha
-**uma** opção de API (Railway ou Render) — não precisa das duas.
+O repositório já vem configurado pra rodar 100% de graça, sem cartão de crédito:
 
-### Banco de dados em produção
-O dashboard e a API não usam o Postgres local do `docker-compose` quando em produção.
-Use um Postgres gerenciado gratuito: [Railway](https://railway.app) (tem um add-on de
-Postgres), [Neon](https://neon.tech) ou [Supabase](https://supabase.com). Depois de
-criar, rode a ingestão + `dbt run` apontando pra esse banco (mesmas variáveis de
-ambiente, só trocando `POSTGRES_HOST` etc).
+| Camada | Serviço | Observação |
+|---|---|---|
+| Banco | [Neon](https://neon.tech) | Postgres serverless, plano free permanente |
+| API do modelo | [Render](https://render.com) | Web service free — "dorme" após 15min sem uso |
+| Dashboard | [Streamlit Community Cloud](https://share.streamlit.io) | Free permanente — também "dorme" por inatividade |
 
-### Opção A — API no Railway
-1. Crie um projeto em [railway.app](https://railway.app) e conecte este repositório
-2. O Railway detecta o `railway.json` automaticamente e builda via `api/Dockerfile`
-3. Configure a variável `MODEL_PATH` se necessário (já vem com default)
-4. Pra deploy automático a cada push: gere um token em *Account Settings -> Tokens* e
-   salve como secret `RAILWAY_TOKEN` no GitHub (Settings -> Secrets and variables ->
-   Actions). O workflow `.github/workflows/deploy.yml` cuida do resto.
+> Testamos Railway pra API primeiro, mas o plano gratuito permanente foi descontinuado
+> (agora é só um crédito de teste de 30 dias). Por isso o projeto usa Render.
 
-### Opção B — API + Dashboard no Render
-1. Conecte o repositório em [render.com](https://render.com) -> New -> Blueprint
-2. O Render lê o `render.yaml` e cria os dois serviços + um Postgres automaticamente
-3. Preencha as variáveis marcadas `sync: false` no painel do Render após o primeiro deploy
+### Deploy da API no Render
+
+1. Conecte o repositório em [render.com](https://render.com) → New → Web Service →
+   aponte pro seu fork, linguagem **Docker**, Dockerfile path `api/Dockerfile`
+2. Configure as variáveis de ambiente do serviço com as credenciais do seu Neon:
+   `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+3. **O modelo é treinado automaticamente durante o build** — o `api/Dockerfile` roda
+   `ml/train.py` direto contra o Neon usando essas credenciais (repassadas como build
+   args), então não precisa comitar nenhum `model.pkl` no repositório
+4. Plano **Free** já vem pré-selecionado — confirme antes de criar o serviço
 
 ### Dashboard no Streamlit Community Cloud
-1. Em [share.streamlit.io](https://share.streamlit.io), aponte para `dashboard/app.py`
-   como *main file path*
-2. O Streamlit Cloud detecta `dashboard/requirements.txt` automaticamente
-3. Em *App settings -> Secrets*, cole o conteúdo de `.streamlit/secrets.toml.example`
-   preenchido com as credenciais reais do seu Postgres e a URL da API já deployada
-4. **Nunca** commite `.streamlit/secrets.toml` com credenciais reais — ele já está no
+
+1. Em [share.streamlit.io](https://share.streamlit.io) → New app → aponte pro seu
+   fork, branch `main`, main file path `dashboard/app.py`
+2. Em *Advanced settings → Secrets*, cole as credenciais do Neon **e** a URL da API
+   já deployada no Render:
+   ```toml
+   POSTGRES_HOST = "seu-host.neon.tech"
+   POSTGRES_PORT = "5432"
+   POSTGRES_DB = "neondb"
+   POSTGRES_USER = "neondb_owner"
+   POSTGRES_PASSWORD = "sua-senha"
+   API_URL = "https://sua-api.onrender.com"
+   ```
+3. **Nunca** commite `.streamlit/secrets.toml` com credenciais reais — já está no
    `.gitignore`
 
+### Dashboard alternativo em Power BI
 
-
-- Taxa geral de atraso: ~15-20% dos pedidos entregues
-- Pedidos com atraso grave (>7 dias) têm nota média de review sensivelmente menor
-  que pedidos no prazo
-- Estados mais distantes dos polos de vendedores (Norte/Nordeste) concentram as
-  maiores taxas de atraso — ver `analytics/sql/03_delivery_delay_impact_on_review.sql`
-  e a aba de mapa por estado no dashboard
+Prefere Power BI em vez do Streamlit (ou quer os dois)? Tem um guia completo em
+[`powerbi/README.md`](powerbi/README.md) — conecta direto nos mesmos marts do dbt,
+sem duplicar nenhuma lógica de negócio.
 
 ## 📈 Principais achados (dataset real do Kaggle, 99.441 pedidos)
 
@@ -211,8 +215,9 @@ ambiente, só trocando `POSTGRES_HOST` etc).
 ├── ml/                  # treino do modelo, model card, monitoramento de drift
 ├── api/                 # FastAPI servindo o modelo
 ├── dashboard/           # Streamlit com KPIs de negócio e simulador
+    powerbi/          # guia de conexao do Power BI Desktop nos marts do dbt
 ├── tests/               # testes de ingestão
-├── railway.json         # config de deploy da API no Railway
+    railway.json         # config de deploy alternativa (API) no Railway
 ├── render.yaml          # config de deploy alternativa (API + dashboard) no Render
 └── .github/workflows/   # CI (lint, testes, dbt test, build Docker) + deploy automático
 ```
