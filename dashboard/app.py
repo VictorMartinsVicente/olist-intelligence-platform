@@ -105,8 +105,8 @@ def render_top_sellers(df_sellers: pd.DataFrame):
     st.subheader("Top 10 vendedores por receita")
     top = df_sellers.sort_values("total_revenue", ascending=False).head(10)
     fig = px.bar(
-        top, x="total_revenue", y="seller_id", orientation="h",
-        labels={"total_revenue": "Receita total", "seller_id": "Vendedor"},
+        top, x="total_revenue", y="seller_name", orientation="h",
+        labels={"total_revenue": "Receita total", "seller_name": "Vendedor"},
         color="seller_state",
     )
     fig.update_layout(yaxis={"categoryorder": "total ascending"})

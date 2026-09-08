@@ -1,10 +1,10 @@
--- Enriquece itens de pedido com informação de vendedor e produto, e calcula receita total do item
+-- Enriquece itens de pedido com informacao de vendedor e produto, e calcula receita total do item
 with items as (
     select * from {{ ref('stg_order_items') }}
 ),
 
 sellers as (
-    select seller_id, seller_state, seller_city from {{ ref('stg_sellers') }}
+    select seller_id, seller_name, seller_state, seller_city from {{ ref('stg_sellers') }}
 ),
 
 products as (
@@ -17,6 +17,7 @@ select
     i.product_id,
     p.product_category_name,
     i.seller_id,
+    s.seller_name,
     s.seller_state,
     s.seller_city,
     i.price,

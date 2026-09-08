@@ -40,6 +40,23 @@ PRODUCT_CATEGORIES = [
 
 PAYMENT_TYPES = ["credit_card", "boleto", "voucher", "debit_card"]
 
+# Nomes de loja legiveis, no lugar de expor o seller_id (hash hex) como se fosse
+# o nome do vendedor no dashboard. O dataset REAL da Olist tambem anonimiza o
+# seller_id (por privacidade), entao esses nomes so existem nos dados sinteticos.
+SELLER_NAME_PREFIXES = [
+    "Loja", "Casa", "Empório", "Center", "Ponto", "Mundo", "Espaço", "Depósito",
+]
+SELLER_NAME_THEMES = [
+    "Tech", "Casa & Lar", "Beleza", "Esporte", "Moda", "Presentes", "Digital",
+    "Papelaria", "Automotivo", "Brinquedos", "Decoração", "Utilidades",
+]
+
+
+def _seller_name(rng, state):
+    prefix = rng.choice(SELLER_NAME_PREFIXES)
+    theme = rng.choice(SELLER_NAME_THEMES)
+    return f"{prefix} {theme} {state}"
+
 
 def _rand_id():
     return uuid.uuid4().hex
@@ -63,11 +80,13 @@ def generate(n_orders: int, seed: int = 42):
     })
 
     # ---- sellers ----
+    seller_states = rng.choice(BR_STATES, n_sellers, p=_state_weights(seller=True))
     sellers = pd.DataFrame({
         "seller_id": [_rand_id() for _ in range(n_sellers)],
+        "seller_name": [_seller_name(rng, s) for s in seller_states],
         "seller_zip_code_prefix": rng.integers(1000, 99999, n_sellers),
         "seller_city": [f"city_{i % 200}" for i in range(n_sellers)],
-        "seller_state": rng.choice(BR_STATES, n_sellers, p=_state_weights(seller=True)),
+        "seller_state": seller_states,
     })
 
     # ---- products ----

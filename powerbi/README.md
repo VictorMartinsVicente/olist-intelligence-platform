@@ -79,10 +79,31 @@ CALCULATE([Nota Média de Review], fct_delivery_performance[is_delayed] = 0)
 | Cartão | Total de Pedidos, Taxa de Atraso, Nota Média de Review |
 | Gráfico de colunas | Eixo: `delay_bucket` — Valor: Nota Média de Review |
 | Gráfico de colunas | Eixo: `customer_state` — Valor: Taxa de Atraso |
-| Gráfico de barras | Eixo: `seller_id` (top 10 por receita) — de `fct_seller_performance` |
+| Gráfico de barras | Eixo: `seller_name` (top 10 por receita) — de `fct_seller_performance` |
 | Mapa (opcional) | `customer_state` com Taxa de Atraso — requer a tabela `olist_geolocation_dataset`, não usada por padrão neste projeto |
 
-### 6. Publicar (opcional, gratuito com limitação)
+### 6. Filtros interativos (cross-filtering e slicers)
+
+Diferente do dashboard Streamlit (que é estático — cada gráfico é independente), o
+Power BI tem **cross-filtering nativo**: clicar numa barra de qualquer gráfico filtra
+automaticamente todos os outros visuais da mesma página, sem escrever código.
+
+Pra tornar isso ainda mais explícito pro usuário do relatório:
+
+1. **Inserir → Segmentação de Dados** (slicer) pra `customer_state` — vira um filtro
+   visível tipo lista ou dropdown que controla a página inteira
+2. Adicione outro slicer pra `delay_bucket` ou `primary_product_category`
+3. Teste clicando direto numa barra do gráfico de "Taxa de Atraso por Estado" — repare
+   que o gráfico de "Nota Média por Situação da Entrega" se atualiza sozinho, mostrando
+   só os pedidos daquele estado
+4. Pra desfazer o filtro por clique, clique de novo na mesma barra (ou no botão de
+   "Limpar seleção" no canto do visual)
+
+Essa interatividade nativa é um dos motivos pra usar Power BI em vez de (ou além de)
+Streamlit num contexto corporativo — quem consome o relatório explora os dados sozinho,
+sem pedir uma nova versão pro analista toda vez que precisa cortar por outro recorte.
+
+### 7. Publicar (opcional, gratuito com limitação)
 
 - **Power BI Service** (conta gratuita): Publicar → escolha um workspace → o relatório
   fica visível só pra quem tem acesso à sua organização/conta
