@@ -1,5 +1,16 @@
 # 📦 Olist Intelligence Platform
 
+## 🔗 Links ao vivo
+
+- **Dashboard**: https://olist-intelligence-platform.streamlit.app
+- **API do modelo (Swagger)**: https://olist-intelligence-platform.onrender.com/docs
+
+> Ambos rodam em planos gratuitos e "dormem" após um período sem uso — a primeira
+> requisição depois de um tempo parado pode levar até ~50 segundos pra responder
+> enquanto o serviço acorda. É esperado, não é bug.
+
+
+
 Pipeline de dados end-to-end + modelo de Machine Learning em produção para prever
 risco de atraso na entrega e medir seu impacto na satisfação do cliente, usando
 dados no formato do dataset real de e-commerce brasileiro **Olist** (2016-2018).
