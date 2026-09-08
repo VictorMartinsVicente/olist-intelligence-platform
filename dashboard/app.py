@@ -155,7 +155,7 @@ def render_delay_simulator():
         }
         try:
             api_url = _get_config("API_URL", "http://localhost:8000")
-            resp = requests.post(f"{api_url}/predict", json=payload, timeout=5)
+            resp = requests.post(f"{api_url}/predict", json=payload, timeout=60)
             resp.raise_for_status()
             result = resp.json()
             risk_color = {"baixo": "green", "medio": "orange", "alto": "red"}[result["risk_level"]]
