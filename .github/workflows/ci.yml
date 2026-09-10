@@ -1,5 +1,5 @@
 # [Framework] TDSP: Infraestrutura/reprodutibilidade | CRISP-ML(Q): Quality Gates
-# # Todo push valida qualidade em 3 camadas: codigo (ruff), dados (dbt test),
+# Todo push valida qualidade em 3 camadas: codigo (ruff), dados (dbt test),
 # e integracao (pytest) antes de liberar para deploy automatico.
 name: CI
 
