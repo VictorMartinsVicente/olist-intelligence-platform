@@ -25,7 +25,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.utils.class_weight import compute_sample_weight
@@ -135,13 +135,30 @@ def main(csv_fallback: str = None):
             y_proba = pipeline.predict_proba(X_test)[:, 1]
             metrics = evaluate(y_test, y_pred, y_proba)
 
+            # Validacao cruzada (5-fold estratificado) no TREINO, separado do
+            # held-out test set acima -- confirma que o desempenho nao depende
+            # de um split sortudo/azarado em particular (etapa de "Assess" do
+            # SEMMA / "Model Evaluation" do CRISP-DM que so olhar 1 split nao cobre).
+            # Desativada por padrao em builds automaticos (Docker/Render) para nao
+            # dobrar o tempo de deploy -- rode com RUN_CROSS_VALIDATION=true
+            # localmente quando for atualizar os numeros do model_card.md.
+            if os.environ.get("RUN_CROSS_VALIDATION", "false").lower() == "true":
+                cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+                cv_auc_scores = cross_val_score(
+                    build_pipeline(model), X_train, y_train, cv=cv, scoring="roc_auc",
+                )
+                metrics["cv_auc_mean"] = float(cv_auc_scores.mean())
+                metrics["cv_auc_std"] = float(cv_auc_scores.std())
+
             mlflow.log_param("model_type", name)
             mlflow.log_params(model.get_params())
             mlflow.log_metrics(metrics)
             mlflow.sklearn.log_model(pipeline, artifact_path="model")
 
+            cv_msg = (f" CV_AUC={metrics['cv_auc_mean']:.4f}(+/-{metrics['cv_auc_std']:.4f})"
+                      if "cv_auc_mean" in metrics else "")
             print(f"[{name}] AUC={metrics['roc_auc']:.4f} "
-                  f"F1={metrics['f1']:.4f} Recall={metrics['recall']:.4f}")
+                  f"F1={metrics['f1']:.4f} Recall={metrics['recall']:.4f}{cv_msg}")
 
             # Selecionamos pelo F1, não pela AUC: com ~8% de positivos, AUC alta pode
             # esconder um modelo que quase nunca prevê atraso (ver model_card.md).
