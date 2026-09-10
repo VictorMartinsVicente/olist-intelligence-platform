@@ -6,6 +6,9 @@ Uso:
 
 Variáveis de ambiente esperadas (ver .env.example):
     POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+
+    [Framework] KDD: Preprocessing | CRISP-DM: Data Preparation (raw layer) --
+    carga bruta sem transformacao de negocio; essa fica no dbt (camada seguinte).
 """
 import glob
 import os

@@ -1,5 +1,7 @@
 -- Núcleo da lógica de negócio: calcula se o pedido atrasou e por quantos dias,
 -- comparando a data real de entrega com a data estimada.
+-- [Framework] KDD: Transformation | SEMMA: Modify -- aqui nasce o achado
+-- central de negocio do projeto (atraso vs. review), a partir do dado bruto.
 with orders as (
     select * from {{ ref('stg_orders') }}
     where order_status = 'delivered'

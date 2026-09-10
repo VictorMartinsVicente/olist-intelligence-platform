@@ -2,6 +2,9 @@
 Dashboard de negócio: KPIs de atraso na entrega, impacto na satisfação do cliente,
 e um simulador de risco de atraso usando a API do modelo.
 
+[Framework] CRISP-DM: Deployment | TDSP: Deployment -- interface pra que o
+negocio consuma tanto os achados exploratorios quanto o modelo em producao.
+
 Rodar localmente:
     streamlit run dashboard/app.py
 """

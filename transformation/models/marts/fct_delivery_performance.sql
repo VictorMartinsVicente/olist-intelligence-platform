@@ -1,5 +1,7 @@
 -- Tabela fato principal do projeto: 1 linha por pedido entregue, com atraso e review.
 -- Alimenta diretamente o dashboard e o treino do modelo de ML.
+-- [Framework] KDD: Transformation (final) | CRISP-DM: Data Preparation (saida) --
+-- este mart e a fonte unica de verdade usada por ml/train.py, dashboard/app.py e Power BI.
 with base as (
     select * from {{ ref('int_order_reviews_joined') }}
 ),

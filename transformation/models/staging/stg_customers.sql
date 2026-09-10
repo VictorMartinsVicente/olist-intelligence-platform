@@ -1,4 +1,4 @@
--- Limpa e padroniza a tabela raw de clientes
+-- Limpa e padroniza a tabela raw de clientes -- [Framework] KDD/CRISP-DM: Preprocessing/Data Preparation (staging layer, 1:1 com a fonte)
 with source as (
     select * from {{ source('raw', 'olist_customers_dataset') }}
 )

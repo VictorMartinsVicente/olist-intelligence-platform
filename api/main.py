@@ -5,6 +5,9 @@ Rodar localmente (fora do Docker):
     uvicorn api.main:app --reload --port 8000
 
 Depois acesse http://localhost:8000/docs para o Swagger interativo.
+
+[Framework] CRISP-DM: Deployment | TDSP: Deployment -- serve o modelo
+treinado em ml/train.py como um endpoint HTTP consumivel.
 """
 import os
 

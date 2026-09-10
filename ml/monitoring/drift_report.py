@@ -6,6 +6,9 @@ Isso é o que separa um projeto de ML "amador" de um pensado pra produção: mod
 degrada com o tempo porque o mundo muda (novo padrão de compra, nova região, etc),
 e sem monitoramento você só descobre isso quando já causou dano.
 
+[Framework] CRISP-ML(Q): Monitoring -- fase que o CRISP-ML(Q) adiciona ao
+CRISP-DM classico (que termina em Deployment sem prever monitoramento continuo).
+
 Uso:
     python ml/monitoring/drift_report.py --new-data path/to/new_data.csv
 """

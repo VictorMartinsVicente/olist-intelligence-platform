@@ -6,6 +6,9 @@ Por que isso existe: para rodar o pipeline de ponta a ponta sem depender de down
 manual. Para usar os dados REAIS do Kaggle, basta baixar o dataset, colocar os CSVs
 originais em data/raw/ com os mesmos nomes de arquivo, e pular este script.
 
+[Framework] KDD: Selection | TDSP: Data Acquisition & Understanding -- este
+script E a etapa de selecao/aquisicao de dados quando nao se usa o Kaggle real.
+
 Uso:
     python data_generator/generate_synthetic_data.py --n-orders 50000
 """
