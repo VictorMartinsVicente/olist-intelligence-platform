@@ -22,7 +22,7 @@ models:
         tests:
           - not_null
           - accepted_values:
-              values: ['SP','RJ','MG','RS','PR','SC','BA','GO','PE','CE','PA','MA','ES','DF','AM','MT','MS','PB','RN','AL']
+                        values: ['SP','RJ','MG','RS','PR','SC','BA','GO','PE','CE','PA','MA','ES','DF','AM','MT','MS','PB','RN','AL','AC','AP','PI','RO','RR','SE','TO']
 
   - name: stg_sellers
     description: "Um registro por vendedor."
