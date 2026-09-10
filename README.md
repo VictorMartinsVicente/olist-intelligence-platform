@@ -4,6 +4,8 @@
 
 - **Dashboard**: https://olist-intelligence-platform.streamlit.app
 - **API do modelo (Swagger)**: https://olist-intelligence-platform.onrender.com/docs
+- **Processo de ciencia de dados** (mapeamento CRISP-DM/CRISP-ML(Q)/KDD/SEMMA/TDSP): [PROCESSO.md](PROCESSO.md)
+- **Analise exploratoria (EDA)**: [analytics/eda.ipynb](analytics/eda.ipynb)
 
 > Ambos rodam em planos gratuitos e "dormem" após um período sem uso — a primeira
 > requisição depois de um tempo parado pode levar até ~50 segundos pra responder
@@ -207,19 +209,22 @@ sem duplicar nenhuma lógica de negócio.
 ## 📁 Estrutura do repositório
 
 ```
-├── .streamlit/          # tema e exemplo de secrets do Streamlit Cloud
-├── data_generator/      # gera dados sintéticos no schema Olist
-├── ingestion/           # carrega CSVs no Postgres + flow do Prefect
-├── transformation/      # projeto dbt (staging → intermediate → marts)
-├── analytics/sql/       # queries SQL avançadas (window functions, cohort)
-├── ml/                  # treino do modelo, model card, monitoramento de drift
-├── api/                 # FastAPI servindo o modelo
-├── dashboard/           # Streamlit com KPIs de negócio e simulador
-    powerbi/          # guia de conexao do Power BI Desktop nos marts do dbt
-├── tests/               # testes de ingestão
-    railway.json         # config de deploy alternativa (API) no Railway
-├── render.yaml          # config de deploy alternativa (API + dashboard) no Render
-└── .github/workflows/   # CI (lint, testes, dbt test, build Docker) + deploy automático
+.streamlit/          # tema e exemplo de secrets do Streamlit Cloud
+data_generator/       # gera dados sinteticos no schema Olist
+ingestion/            # carrega CSVs no Postgres + flow do Prefect
+transformation/        # projeto dbt (staging -> intermediate -> marts)
+analytics/sql/        # queries SQL avancadas (window functions, cohort)
+analytics/eda.ipynb   # analise exploratoria formal (Data Understanding)
+ml/                   # treino do modelo, model card, monitoramento de drift
+ml/monitoring/fairness_check.py  # checagem de fairness por estado
+api/                  # FastAPI servindo o modelo
+dashboard/            # Streamlit com KPIs de negocio e simulador
+powerbi/              # guia de conexao do Power BI Desktop nos marts do dbt
+tests/                # testes de ingestao
+railway.json           # config de deploy alternativa (API) no Railway
+render.yaml            # config de deploy alternativa (API + dashboard) no Render
+.github/workflows/     # CI (lint, testes, dbt test, build Docker) + deploy automatico
+PROCESSO.md            # como o projeto mapeia para CRISP-DM/CRISP-ML(Q)/KDD/SEMMA/TDSP
 ```
 
 ## ⚠️ Limitações conhecidas
