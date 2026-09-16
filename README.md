@@ -167,6 +167,7 @@ O repositório já vem configurado pra rodar 100% de graça, sem cartão de cré
    `ml/train.py` direto contra o Neon usando essas credenciais (repassadas como build
    args), então não precisa comitar nenhum `model.pkl` no repositório
 4. Plano **Free** já vem pré-selecionado — confirme antes de criar o serviço
+5. (Opcional, fecha o CI/CD) Copie o **Deploy Hook** do servico (Settings -> Deploy Hook no painel do Render) e adicione como secret `RENDER_DEPLOY_HOOK_URL` no GitHub (Settings -> Secrets and variables -> Actions). A partir dai, todo push relevante em `main` dispara o deploy sozinho via `.github/workflows/deploy.yml` -- sem esse secret, o workflow so avisa e pula, e o deploy continua manual como antes.
 
 ### Dashboard no Streamlit Community Cloud
 

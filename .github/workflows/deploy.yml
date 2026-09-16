@@ -1,4 +1,8 @@
-name: Deploy API (Railway)
+name: Deploy API (Render)
+
+# [Framework] TDSP: Deployment | CRISP-DM: Deployment -- fecha o ciclo de
+# CI/CD automatizando o "Manual Deploy" que antes exigia um clique no painel
+# do Render a cada push (ver PROCESSO.md e README.md, secao Deploy).
 
 on:
   push:
@@ -6,30 +10,27 @@ on:
     paths:
       - "api/**"
       - "ml/**"
-      - "railway.json"
+      - "render.yaml"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Verificar se RAILWAY_TOKEN esta configurado
+      - name: Verificar se RENDER_DEPLOY_HOOK_URL esta configurado
         id: check_secret
         run: |
-          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "RAILWAY_TOKEN nao configurado - pulando deploy."
+            echo "RENDER_DEPLOY_HOOK_URL nao configurado - pulando deploy automatico."
+            echo "Configure em: Render Dashboard -> seu servico -> Settings -> Deploy Hook,"
+            echo "depois adicione como secret do repositorio (Settings -> Secrets and"
+            echo "variables -> Actions -> New repository secret)."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Instalar Railway CLI
+      - name: Disparar deploy no Render
         if: steps.check_secret.outputs.skip == 'false'
-        run: npm install -g @railway/cli
-
-      - name: Deploy
-        if: steps.check_secret.outputs.skip == 'false'
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service olist-api
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "Deploy disparado no Render."
