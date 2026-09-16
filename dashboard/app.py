@@ -185,12 +185,12 @@ def main():
         )
         st.stop()
 
-        # [Framework] CRISP-ML(Q): nota de transparencia sobre a fonte dos dados --
-        # o dataset sintetico tem uma taxa de atraso bem mais alta que a real (Kaggle,
-        # 8,1%), entao avisamos quando a taxa observada foge muito do valor real
-        # conhecido, para quem chegar direto no dashboard sem ler o README.
-        observed_delay_rate = df["is_delayed"].mean() if len(df) else 0
-        if observed_delay_rate > 0.15:
+    # [Framework] CRISP-ML(Q): nota de transparencia sobre a fonte dos dados --
+    # o dataset sintetico tem uma taxa de atraso bem mais alta que a real (Kaggle,
+    # 8,1%), entao avisamos quando a taxa observada foge muito do valor real
+    # conhecido, para quem chegar direto no dashboard sem ler o README.
+    observed_delay_rate = df["is_delayed"].mean() if len(df) else 0
+    if observed_delay_rate > 0.15:
         st.info(
             f"Este dashboard esta lendo dados **sinteticos** (taxa de atraso observada: "
             f"{observed_delay_rate:.1%}). Os achados de negocio documentados no README e no "
