@@ -9,6 +9,11 @@ models:
     columns:
       - name: order_id
         tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
       - name: is_delayed
         tests:
           - accepted_values:
@@ -22,7 +27,14 @@ models:
     description: "Métricas agregadas de receita e volume por vendedor."
     columns:
       - name: seller_id
-        tests: [unique, not_null]
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('dim_sellers')
+              field: seller_id
+      - name: seller_name
+        description: "Nome legível do vendedor (só existe em dados sintéticos; no dataset real do Kaggle, o vendedor é anonimizado por privacidade)."
 
   - name: dim_customers
     columns:
@@ -33,3 +45,5 @@ models:
     columns:
       - name: seller_id
         tests: [unique, not_null]
+      - name: seller_name
+        description: "Nome legível do vendedor (só existe em dados sintéticos; no dataset real do Kaggle, o vendedor é anonimizado por privacidade)."

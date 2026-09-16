@@ -23,6 +23,7 @@ import pandas as pd
 BR_STATES = [
     "SP", "RJ", "MG", "RS", "PR", "SC", "BA", "GO", "PE", "CE",
     "PA", "MA", "ES", "DF", "AM", "MT", "MS", "PB", "RN", "AL",
+    "AC", "AP", "PI", "RO", "RR", "SE", "TO",
 ]
 
 # Estados mais distantes de SP (onde fica a maior concentração de vendedores) tendem
@@ -31,7 +32,8 @@ STATE_DISTANCE_FACTOR = {
     "SP": 1.0, "RJ": 1.1, "MG": 1.15, "PR": 1.2, "SC": 1.25, "RS": 1.3,
     "GO": 1.3, "DF": 1.3, "ES": 1.2, "BA": 1.5, "PE": 1.7, "CE": 1.8,
     "PA": 2.0, "MA": 2.0, "AM": 2.4, "MT": 1.6, "MS": 1.5, "PB": 1.75,
-    "RN": 1.8, "AL": 1.75,
+    "RN": 1.8, "AL": 1.75, "PI": 1.9, "SE": 1.7, "TO": 1.9,
+    "AC": 2.4, "RO": 2.2, "RR": 2.5, "AP": 2.3,
 }
 
 PRODUCT_CATEGORIES = [

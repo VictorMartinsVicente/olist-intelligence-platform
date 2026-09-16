@@ -159,6 +159,7 @@ def render_delay_simulator():
         try:
             api_url = _get_config("API_URL", "http://localhost:8000")
             resp = requests.post(f"{api_url}/predict", json=payload, timeout=60)
+
             resp.raise_for_status()
             result = resp.json()
             risk_color = {"baixo": "green", "medio": "orange", "alto": "red"}[result["risk_level"]]
@@ -183,6 +184,19 @@ def main():
             f"rodando e que o dbt já foi executado (`dbt run`). Erro: {e}"
         )
         st.stop()
+
+        # [Framework] CRISP-ML(Q): nota de transparencia sobre a fonte dos dados --
+        # o dataset sintetico tem uma taxa de atraso bem mais alta que a real (Kaggle,
+        # 8,1%), entao avisamos quando a taxa observada foge muito do valor real
+        # conhecido, para quem chegar direto no dashboard sem ler o README.
+        observed_delay_rate = df["is_delayed"].mean() if len(df) else 0
+        if observed_delay_rate > 0.15:
+        st.info(
+            f"Este dashboard esta lendo dados **sinteticos** (taxa de atraso observada: "
+            f"{observed_delay_rate:.1%}). Os achados de negocio documentados no README e no "
+            f"model_card.md usam o dataset **real** do Kaggle (taxa real: 8,1%). Para ver os "
+            f"numeros reais aqui, carregue os CSVs originais em data/raw/ e rode a ingestao + dbt."
+        )
 
     render_kpis(df)
     st.divider()
