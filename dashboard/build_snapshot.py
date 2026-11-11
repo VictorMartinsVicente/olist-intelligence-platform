@@ -19,6 +19,13 @@ from pathlib import Path
 import pandas as pd
 
 OUT_DIR = Path(__file__).parent / "data"
+ML_DIR = Path(__file__).parent.parent / "ml" / "data"
+
+
+def _min_non_null(s: pd.Series):
+    """Equivalente ao min() do SQL, que ignora NULL."""
+    s = s.dropna()
+    return s.min() if len(s) else None
 
 
 def build(raw_dir: Path) -> None:
@@ -79,6 +86,45 @@ def build(raw_dir: Path) -> None:
     seller["seller_name"] = (
         "Vendedor " + seller.seller_id.str[:6] + " (" + seller.seller_city.str.title() + ")"
     )
+
+    # features de treino do modelo (mesmas colunas que ml/train.py le do mart)
+    payments = pd.read_csv(raw_dir / "olist_order_payments_dataset.csv")
+    products = pd.read_csv(raw_dir / "olist_products_dataset.csv")
+    it_feat = items.merge(sellers[["seller_id", "seller_state"]], on="seller_id", how="left").merge(
+        products[["product_id", "product_category_name"]], on="product_id", how="left"
+    )
+    it_feat["item_total_value"] = it_feat.price + it_feat.freight_value
+    oi = it_feat.groupby("order_id").agg(
+        n_items=("order_item_id", "count"),
+        order_total_value=("item_total_value", "sum"),
+        avg_freight_value=("freight_value", "mean"),
+        primary_seller_state=("seller_state", _min_non_null),
+        primary_product_category=("product_category_name", _min_non_null),
+    )
+    # mesmo grao do mart fct_delivery_performance: left join com TODOS os
+    # pagamentos (pedidos com mais de um meio de pagamento geram mais de uma linha),
+    # para o modelo treinar exatamente sobre o que o dbt entrega
+    pay = payments[["order_id", "payment_type", "payment_installments"]].copy()
+    pay["payment_type"] = pay.payment_type.str.strip().str.lower()
+    train = d.merge(oi, left_on="order_id", right_index=True, how="left").merge(
+        pay, on="order_id", how="left"
+    )
+    train["estimated_delivery_days"] = (
+        train.order_estimated_delivery_date - train.order_purchase_timestamp
+    ).dt.total_seconds() / 86400.0
+    train["purchase_month"] = train.order_purchase_timestamp.dt.month
+    # extract(dow) do Postgres: domingo=0 ... sabado=6
+    train["purchase_day_of_week"] = (train.order_purchase_timestamp.dt.dayofweek + 1) % 7
+    train_cols = [
+        "estimated_delivery_days", "order_total_value", "avg_freight_value", "n_items",
+        "payment_installments", "purchase_month", "purchase_day_of_week",
+        "customer_state", "primary_seller_state", "primary_product_category",
+        "payment_type", "is_delayed",
+    ]
+    train = train[train_cols].dropna().round(2)
+    ML_DIR.mkdir(exist_ok=True)
+    train.to_csv(ML_DIR / "training_snapshot.csv.gz", index=False)
+    print(f"linhas de treino (ml/data/training_snapshot.csv.gz): {len(train):,}")
 
     OUT_DIR.mkdir(exist_ok=True)
     delivery.to_csv(OUT_DIR / "fct_delivery_performance.csv.gz", index=False)
