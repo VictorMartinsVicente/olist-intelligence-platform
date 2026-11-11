@@ -230,7 +230,7 @@ PROCESSO.md            # como o projeto mapeia para CRISP-DM/CRISP-ML(Q)/KDD/SEM
 
 ## ⚠️ Limitações conhecidas
 
-- Dados sintéticos por padrão (ver seção "Sobre os dados" acima)
+- O pipeline local usa dados sintéticos por padrão (ver seção "Sobre os dados" acima). O dashboard publicado lê um snapshot dos marts gerado a partir do dataset **real** (`dashboard/build_snapshot.py`, saída em `dashboard/data/`); para ler do Postgres, defina `DATA_SOURCE=postgres`
 - Modelo de ML é um baseline intencionalmente simples (regressão logística vs
   Gradient Boosting) — ver `ml/model_card.md` para a discussão completa de trade-offs
 - Sem dados externos (clima, greves, feriados regionais) que afetam prazo de entrega

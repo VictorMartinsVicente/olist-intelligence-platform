@@ -9,6 +9,7 @@ Rodar localmente:
     streamlit run dashboard/app.py
 """
 import os
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
@@ -39,8 +40,21 @@ def get_engine():
     return create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}")
 
 
+SNAPSHOT_DIR = Path(__file__).parent / "data"
+
+
+def _use_snapshot() -> bool:
+    """Fonte padrao: snapshot dos marts gerado a partir do dataset REAL do Kaggle
+    (dashboard/build_snapshot.py). Defina DATA_SOURCE=postgres para ler os marts
+    direto do banco (ex.: rodando localmente com docker-compose + dbt)."""
+    source = (_get_config("DATA_SOURCE", "snapshot") or "snapshot").lower()
+    return source != "postgres" and (SNAPSHOT_DIR / "fct_delivery_performance.csv.gz").exists()
+
+
 @st.cache_data(ttl=600)
 def load_delivery_data() -> pd.DataFrame:
+    if _use_snapshot():
+        return pd.read_csv(SNAPSHOT_DIR / "fct_delivery_performance.csv.gz")
     engine = get_engine()
     query = "select * from marts.fct_delivery_performance"
     return pd.read_sql(query, engine)
@@ -48,6 +62,8 @@ def load_delivery_data() -> pd.DataFrame:
 
 @st.cache_data(ttl=600)
 def load_seller_data() -> pd.DataFrame:
+    if _use_snapshot():
+        return pd.read_csv(SNAPSHOT_DIR / "fct_seller_performance.csv.gz")
     engine = get_engine()
     query = "select * from marts.fct_seller_performance"
     return pd.read_sql(query, engine)
@@ -106,7 +122,13 @@ def render_delay_by_state_chart(df: pd.DataFrame):
 
 def render_top_sellers(df_sellers: pd.DataFrame):
     st.subheader("Top 10 vendedores por receita")
-    top = df_sellers.sort_values("total_revenue", ascending=False).head(10)
+    top = df_sellers.sort_values("total_revenue", ascending=False).head(10).copy()
+    # O dataset real do Kaggle nao tem nome de vendedor; sem esse fallback o
+    # plotly recebia uma coluna vazia e o bloco quebrava com ValueError.
+    if "seller_name" not in top.columns or top["seller_name"].isna().all():
+        top["seller_name"] = "Vendedor " + top["seller_id"].astype(str).str[:6]
+    top["seller_name"] = top["seller_name"].fillna(top["seller_id"].astype(str).str[:6])
+    top["seller_state"] = top["seller_state"].fillna("N/D")
     fig = px.bar(
         top, x="total_revenue", y="seller_name", orientation="h",
         labels={"total_revenue": "Receita total", "seller_name": "Vendedor"},
@@ -196,6 +218,12 @@ def main():
             f"{observed_delay_rate:.1%}). Os achados de negocio documentados no README e no "
             f"model_card.md usam o dataset **real** do Kaggle (taxa real: 8,1%). Para ver os "
             f"numeros reais aqui, carregue os CSVs originais em data/raw/ e rode a ingestao + dbt."
+        )
+
+    if _use_snapshot():
+        st.caption(
+            "Fonte: dataset público real da Olist (Kaggle, 99.441 pedidos, 2016-2018), "
+            "processado com a mesma lógica dos modelos dbt. Considera pedidos entregues e avaliados."
         )
 
     render_kpis(df)
