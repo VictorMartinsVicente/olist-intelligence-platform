@@ -67,6 +67,7 @@ jobs:
           POSTGRES_USER: olist_user
           POSTGRES_PASSWORD: olist_pass
         run: |
+          cp transformation/profiles.yml.example transformation/profiles.yml
           dbt deps --project-dir transformation --profiles-dir transformation || true
           dbt run --project-dir transformation --profiles-dir transformation
           dbt test --project-dir transformation --profiles-dir transformation
