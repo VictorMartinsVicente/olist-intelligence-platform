@@ -41,7 +41,7 @@ jobs:
         run: |
           pip install -r api/requirements.txt
           pip install -r dashboard/requirements.txt
-          pip install pandas numpy scikit-learn joblib mlflow sqlalchemy psycopg2-binary pytest ruff dbt-postgres evidently
+          pip install pandas numpy scikit-learn joblib mlflow sqlalchemy psycopg2-binary pytest ruff dbt-postgres "evidently==0.4.33"
 
       - name: Lint (ruff)
         run: ruff check . --exclude transformation
