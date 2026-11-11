@@ -7,10 +7,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
 COPY ml/train.py ./ml/train.py
+COPY ml/data/training_snapshot.csv.gz ./ml/data/training_snapshot.csv.gz
 
-# O modelo e treinado durante o build, direto contra o Postgres (Neon),
-# usando as credenciais passadas como variaveis de ambiente do servico no Render
-# (Render as repassa automaticamente como build args para servicos Docker).
+# O modelo e treinado durante o build. Por padrao usa o snapshot com o dataset
+# REAL da Olist (ml/data/training_snapshot.csv.gz, gerado por
+# dashboard/build_snapshot.py com a mesma logica do dbt). Para treinar direto
+# contra o Postgres (Neon), passe TRAINING_DATA="" como build arg; as credenciais
+# vem das variaveis de ambiente do servico no Render (repassadas como build args).
+ARG TRAINING_DATA=ml/data/training_snapshot.csv.gz
 ARG POSTGRES_HOST
 ARG POSTGRES_PORT
 ARG POSTGRES_DB
@@ -23,7 +27,7 @@ RUN POSTGRES_HOST=$POSTGRES_HOST \
     POSTGRES_USER=$POSTGRES_USER \
     POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
     MLFLOW_TRACKING_URI=file:///tmp/mlruns \
-    python ml/train.py
+    python ml/train.py $TRAINING_DATA
 
 ENV MODEL_PATH=/app/ml/artifacts/model.pkl
 
